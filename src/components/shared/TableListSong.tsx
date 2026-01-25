@@ -33,6 +33,7 @@ const TableListSong = ({
   const displaySongs = songs && songs.length > 0 ? songs : [];
 
   const handlePlayPause = (id: string) => {
+    console.log("displaySongs: ", displaySongs)
     setPlayingId(playingId === id ? null : id);
     const imgUrl =
       displaySongs.find((song: Song) => song._id === id)?.cover_image_url || "";

@@ -32,8 +32,10 @@ const PlaylistDetail = ({
   const navigate = useNavigate();
   const { hardDeletePlaylistById: deletePlaylistFromStore } =
     usePlaylistStore();
+
   const [isPlaying, setIsPlaying] = useState(false);
 
+  
   const handleDeletePlaylist = async () => {
     try {
       await deletePlaylistFromStore(playlistId);

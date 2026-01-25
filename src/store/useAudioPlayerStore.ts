@@ -10,13 +10,16 @@ interface AudioPlayerState {
   isRandom: boolean;
   volume: number;
 
-  play: (song: Song, queue: Song[]) => void;
+  playSong: (song: Song) => void;
+  setQueueAndPlay: (song: Song, queue: Song[]) => void;
+
   pause: () => void;
   resume: () => void;
 
   previous: () => void;
   next: () => void;
-
+  toggleLoop: () => void;
+  toggleRandom: () => void;
   volumeLevelHandler: (level: number) => void;
 }
 export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
@@ -26,12 +29,34 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
   currentIndexSong: 0,
   isLoop: false,
   isRandom: false,
+  isRepeatMode: false,
   volume: 80,
-  play: (song: Song, queue: Song[]) => {
+  playSong: (song: Song) => {
+    const { queue } = get();
+
+    const index = queue.findIndex((s) => s._id === song._id);
+
+    if (index !== -1) {
+      set({
+        currentSong: song,
+        currentIndexSong: index,
+        isPlaying: true,
+      });
+    } else {
+      set({
+        currentSong: song,
+        currentIndexSong: 0,
+        isPlaying: true,
+      });
+    }
+  },
+  setQueueAndPlay: (song: Song, queue: Song[]) => {
+    const index = queue.findIndex((s) => s._id === song._id);
+
     set({
-      currentSong: song,
       queue,
-      currentIndexSong: queue.findIndex((s) => s._id === song._id),
+      currentSong: song,
+      currentIndexSong: index !== -1 ? index : 0,
       isPlaying: true,
     });
   },
@@ -82,7 +107,7 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
         });
       }
     } else {
-      // random enabled - pick random song
+      // random
       const randomIndex = Math.floor(Math.random() * queue.length);
       set({
         currentSong: queue[randomIndex],
@@ -92,41 +117,36 @@ export const useAudioPlayerStore = create<AudioPlayerState>((set, get) => ({
   },
   next: () => {
     const { isLoop, isRandom, queue, currentIndexSong } = get();
-    if (!isLoop && !isRandom) {
-      // no loop, no random
-      if (currentIndexSong + 1 < queue.length) {
-        const nextIndex = currentIndexSong + 1;
-        if (queue[nextIndex]) {
-          set({
-            currentSong: queue[nextIndex],
-            currentIndexSong: nextIndex,
-          });
-        }
-      }
-      //   loop, no random
-      else if (isLoop && !isRandom) {
-        if (currentIndexSong + 1 < queue.length) {
-          const nextIndex = queue[0]; //back to first song
-          set({
-            currentSong: nextIndex,
-            currentIndexSong: 0,
-          });
-        } else {
-          const nextIndex = currentIndexSong + 1;
-          set({
-            currentSong: queue[nextIndex],
-            currentIndexSong: nextIndex,
-          });
-        }
-        // loop, random
-      } else {
-        const randomIndex = Math.floor(Math.random() * queue.length);
-        set({
-          currentSong: queue[randomIndex],
-          currentIndexSong: randomIndex,
-        });
-      }
+    if (queue.length === 0) return;
+
+    if (isRandom) {
+      const randomIndex = Math.floor(Math.random() * queue.length);
+      set({
+        currentSong: queue[randomIndex],
+        currentIndexSong: randomIndex,
+      });
+      return;
     }
+
+    const nextIndex = currentIndexSong + 1;
+
+    if (nextIndex < queue.length) {
+      set({
+        currentSong: queue[nextIndex],
+        currentIndexSong: nextIndex,
+      });
+    } else if (isLoop) {
+      set({
+        currentSong: queue[0],
+        currentIndexSong: 0,
+      });
+    }
+  },
+  toggleLoop: () => {
+    set((state) => ({ isLoop: !state.isLoop }));
+  },
+  toggleRandom: () => {
+    set((state) => ({ isRandom: !state.isRandom }));
   },
 
   volumeLevelHandler: (level: number) => {

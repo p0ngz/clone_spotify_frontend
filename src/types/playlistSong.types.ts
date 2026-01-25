@@ -8,6 +8,9 @@ export interface PlaylistSong {
   cover_image_url: string;
   duration: number;
   artist_id: string;
+  artist_name?: string;
+  album_id?: string;
+  album_title?: string;
   genre: string[];
   createdAt?: string;
   isDeleted?: boolean;
