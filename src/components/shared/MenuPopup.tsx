@@ -19,7 +19,6 @@ const MenuPopup = ({ options, triggerIcon }: MenuProps) => {
   const open = Boolean(anchorEl);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    console.log("event currentTarget:", event.currentTarget);
     setAnchorEl(event.currentTarget);
   };
 

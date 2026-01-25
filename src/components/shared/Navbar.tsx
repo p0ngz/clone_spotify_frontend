@@ -13,7 +13,7 @@ const Navbar = () => {
     navigate("/");
   };
   return (
-    <header className="w-full h-16  text-white flex items-center justify-between px-4 gap-4 shadow-sm">
+    <header className="w-full h-16 text-white flex items-center justify-between px-4 gap-4 bg-black z-10 shadow-sm sticky top-0">
       <div className="flex items-center gap-3 min-w-0">
         <div className="h-14 w-14 rounded-full text-black font-black text-xl grid place-items-center">
           <img
@@ -36,7 +36,7 @@ const Navbar = () => {
           <input
             type="text"
             placeholder="What do you want to play?"
-            className="bg-transparent outline-none text-sm  h-full text-gray-100 placeholder:text-gray-400 w-full"
+            className=" outline-none text-sm  h-full text-gray-100 placeholder:text-gray-400 w-full"
           />
           <button className="hidden md:inline-flex items-center justify-center h-12 w-12 rounded-full  text-gray-200 transition ">
             <LibraryMusicIcon fontSize="small" />

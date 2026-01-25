@@ -20,7 +20,6 @@ export const useAlbumStore = create<AlbumState>((set) => ({
 
     try {
       const data = await albumService.getAlbumByArtistId(artistId);
-      console.log("album data: ", data.albumByArtistId[0]);
       set({ albums: data.albumByArtistId[0] || [], isLoading: false });
       return data;
     } catch (err) {

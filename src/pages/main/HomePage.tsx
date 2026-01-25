@@ -4,15 +4,16 @@ import { useSongStore } from "../../store/useSongStore";
 
 const HomePage = () => {
   const [bgImage, setBgImage] = useState<string>("");
-  const { songs, artistName } = useSongStore();
+  const { songs, getAllSongs, artistName } = useSongStore();
 
   const receiveImgUrl = (url: string) => {
     setBgImage(url);
   };
 
   useEffect(() => {
-    console.log("songs: ", songs);
-  }, [songs]);
+    getAllSongs();
+  }, [getAllSongs]);
+
   return (
     <div id="homepage" className="w-full relative">
       <div

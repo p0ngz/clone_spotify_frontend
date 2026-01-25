@@ -16,7 +16,8 @@ interface PlaylistSongResponse {
 
 export const playlistSongService = {
   getAllPlaylistSongs: async () => {
-    const response = await axiosInstance.get<PlaylistSongResponse>("/playlistSongs");
+    const response =
+      await axiosInstance.get<PlaylistSongResponse>("/playlistSongs");
     return response?.data;
   },
   getPlaylistSongById: async (id: string) => {
@@ -44,8 +45,11 @@ export const playlistSongService = {
     const response = await axiosInstance.put(`/playlistSongs/${id}`, data);
     return response?.data;
   },
-  deletePlaylistSongById: async (id: string) => {
-    const response = await axiosInstance.delete(`/playlistSongs/${id}`);
+  // /playlist/:playlistId/song/:songId
+  deletePlaylistSongById: async (playlistId: string, songId: string) => {
+    const response = await axiosInstance.delete(
+      `/playlistSongs/playlist/${playlistId}/song/${songId}`,
+    );
     return response?.data;
   },
   hardDeletePlaylistById: async (id: string) => {

@@ -53,7 +53,6 @@ export const useSongStore = create<SongState>((set) => ({
 
     try {
       const response = await songService.getSongByArtistId(artistId);
-      console.log("response")
       const songs = response?.songByArtistId?.[0]?.songs || [];
       set({ songs, isLoading: false });
       return songs;

@@ -8,6 +8,7 @@ interface PlaylistState {
   getAllPlaylists: () => Promise<Playlist[] | undefined>;
   getPlaylistById: (id: string) => Promise<Playlist | undefined>;
   getPlaylistByUserId: (userId: string) => Promise<Playlist[] | undefined>;
+  hardDeletePlaylistById: (id: string) => Promise<void>;
   isLoading: boolean;
   error: string | null;
 }
@@ -45,12 +46,22 @@ export const usePlaylistStore = create<PlaylistState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const response = await playlistService.getPlaylistByUserId(userId);
-      console.log("response: ", response);
+      console.log("response playlists: ", response?.playlists);
       set({ playlists: response?.playlistsByUserId?.playlists || [], isLoading: false });
       return response?.playlists;
     } catch (err) {
       set({ error: (err as Error).message, isLoading: false });
       return undefined;
+    }
+  },
+  hardDeletePlaylistById: async (id: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      await playlistService.hardDeletePlaylistById(id);
+      set({ isLoading: false });
+    } catch (err) {
+      set({ error: (err as Error).message, isLoading: false });
+      throw err;
     }
   },
 }));

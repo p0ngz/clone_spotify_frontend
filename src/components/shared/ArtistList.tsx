@@ -25,7 +25,9 @@ const ArtistList = ({ item, selected = false, onSelect }: ArtistListProps) => {
         id="artist-title"
         className="hidden md:block flex flex-col items-start justify-center flex-1 min-w-0"
       >
-        <h1 className={`text-sm font-medium truncate ${selected ? "text-green-600" : "text-white"}`}>
+        <h1
+          className={`text-sm font-medium truncate ${selected ? "text-green-600" : "text-white"}`}
+        >
           {item.name}
         </h1>
         <span className="text-xs text-gray-500 truncate">{item.type}</span>

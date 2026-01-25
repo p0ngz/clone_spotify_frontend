@@ -25,7 +25,11 @@ const chipCardData = [
 const LeftSidebar = () => {
   const navigate = useNavigate();
   const { artists, getAllArtists, error: artistError } = useArtistStore();
-  const { playlists, getPlaylistByUserId, error: playlistError } = usePlaylistStore();
+  const {
+    playlists,
+    getPlaylistByUserId,
+    error: playlistError,
+  } = usePlaylistStore();
   const { getSongByArtistId, setArtistName } = useSongStore();
   const { getAllAlbumByArtistId } = useAlbumStore();
 
@@ -34,16 +38,19 @@ const LeftSidebar = () => {
     const playlistItems: SidebarItem[] = (playlists || []).map((p) => ({
       id: p._id,
       name: p.name,
-      image: p.cover_image_url,
+      image: p.cover_image_url
+        ? p.cover_image_url
+        : "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=400&fit=crop",
       type: "playlist",
     }));
     const artistItems: SidebarItem[] = (artists || []).map((a) => ({
       id: a._id,
       name: a.name,
-      image: a.image_url,
+      image: a.image_url
+        ? a.image_url
+        : "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=400&h=400&fit=crop",
       type: "artist",
     }));
-
 
     return [...playlistItems, ...artistItems];
   }, [playlists, artists]);
@@ -73,10 +80,8 @@ const LeftSidebar = () => {
       return;
     }
 
-    // Artist click: set artist name and fetch songs + albums
     setArtistName(item.name);
     await getSongByArtistId(item.id);
-    // Fetch albums for this artist to display album names in table
     await getAllAlbumByArtistId(item.id);
   };
 
@@ -98,6 +103,9 @@ const LeftSidebar = () => {
     loadSidebarData();
   }, [loadSidebarData]);
 
+  useEffect(() => {
+    console.log("playlists: ", playlists);
+  });
   return (
     <div
       id="left-sidebar"

@@ -9,16 +9,16 @@ const MainLayout = () => {
   const isHomepage = location.pathname === "/";
   return (
     <main className="w-screen min-h-screen bg-black text-white flex flex-col">
-      <div id="navbar-container" className="h-16 flex-none">
+      <div id="navbar-container" className="fixed top-0 left-0 w-full h-16 flex-none z-50">
         <Navbar />
       </div>
 
       <div
         id="content-container"
-        className="flex-1 grid grid-cols-12 gap-4 px-4 pb-4 overflow-hidden min-h-0"
+        className="flex-1 grid grid-cols-12 gap-4 px-4 pb-4 overflow-hidden h-[60vh] mt-16"
       >
         {isHomepage && (
-          <div className="col-span-2 md:col-span-3 lg:col-span-3 xl:col-span-3 bg-[#111] rounded-lg overflow-y-auto overflow-x-hidden p-3 scrollbar-hide">
+          <div className="col-span-2 md:col-span-3 lg:col-span-3 xl:col-span-3 bg-[#111] rounded-lg overflow-y-auto overflow-x-hidden p-3 ">
             <LeftSidebar />
           </div>
         )}
@@ -30,7 +30,7 @@ const MainLayout = () => {
         </div>
       </div>
 
-      <div id="audio-player-container" className="w-full px-4 pb-4">
+      <div id="audio-player-container" className="w-full px-4 pb-4 z-10">
         <Footer />
       </div>
     </main>
