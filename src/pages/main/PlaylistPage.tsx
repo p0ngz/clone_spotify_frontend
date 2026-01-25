@@ -36,8 +36,6 @@ const PlaylistPage = () => {
     fetchData(playlistId);
   }, [playlistId, getPlaylistSongByPlaylistId]);
   useEffect(() => {
-    console.log("playlistMetadata: ", playlistMetadata);
-    console.log("playlistSongs: ", playlistSongs);
   }, [playlistMetadata]);
   return (
     <div id="playlist-page" className="w-full">

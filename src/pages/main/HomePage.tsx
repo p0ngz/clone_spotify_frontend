@@ -1,4 +1,4 @@
-import TableListSong from "../../components/shared/TableListSong";
+import TableListSong from "../../components/TableListSong";
 import { useState, useEffect } from "react";
 import { useSongStore } from "../../store/useSongStore";
 

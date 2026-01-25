@@ -30,7 +30,8 @@ const PlaylistSongTable = ({
   playlistId = "",
   sendImageBackground,
 }: PlaylistSongTableProps) => {
-  const { deletePlaylistSongById } = usePlaylistSongStore();
+  const { deletePlaylistSongById, getPlaylistSongByPlaylistId } =
+    usePlaylistSongStore();
   const { setQueueAndPlay, pause, isPlaying, currentSong } =
     useAudioPlayerStore();
   const [filterText, setFilterText] = useState("");
@@ -67,9 +68,7 @@ const PlaylistSongTable = ({
   });
 
   const handlePlayPause = (song: PlaylistSong) => {
-    console.log("filteredSongs: ", filteredSongs)
     const queue = filteredSongs.map(mapToSong);
-    console.log("queue: ", queue);
     const isCurrent = currentSong?._id === (song.song_id || song._id);
 
     if (isCurrent && isPlaying) {
@@ -89,6 +88,15 @@ const PlaylistSongTable = ({
     return `${minutes}:${String(secs).padStart(2, "0")}`;
   };
 
+  const refetchPlaylistSongs = async () => {
+    if (!playlistId) return;
+    try {
+      await getPlaylistSongByPlaylistId(playlistId);
+    } catch (err) {
+      console.error("Error refetching playlist songs:", err);
+    }
+  };
+
   const removeSongFromPlaylist = async (songId: string) => {
     if (!playlistId) {
       console.error("Playlist ID is required to remove a song");
@@ -96,7 +104,7 @@ const PlaylistSongTable = ({
     }
     try {
       await deletePlaylistSongById(playlistId, songId);
-      console.log(`Song ${songId} removed from playlist ${playlistId}`);
+      await refetchPlaylistSongs();
     } catch (err) {
       console.error("Error removing song from playlist:", err);
     }

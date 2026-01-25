@@ -62,7 +62,6 @@ const AudioPlayer = () => {
     audioRef.current.volume = (volume ?? 80) / 100;
   }, [volume]);
 
-  // wire time update for progress
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -98,7 +97,6 @@ const AudioPlayer = () => {
     }
   };
   const handleVolume = (_: Event, value: number | number[]) => {
-    console.log("value: ", value);
     const lvl = Array.isArray(value) ? value[0] : value;
     volumeLevelHandler(lvl);
   };
@@ -112,7 +110,6 @@ const AudioPlayer = () => {
   const totalSeconds = duration || songInfo?.duration || 0;
 
   useEffect(() => {
-    console.log(audioRef.current);
   }, [audioRef]);
   return (
     <div

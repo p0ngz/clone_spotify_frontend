@@ -10,10 +10,10 @@ import PlayArrowOutlinedIcon from "@mui/icons-material/PlayArrowOutlined";
 import PauseOutlinedIcon from "@mui/icons-material/PauseOutlined";
 import DateRangeOutlinedIcon from "@mui/icons-material/DateRangeOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
-import type { Song } from "../../types/song.types";
+import type { Song } from "../types/song.types";
 import { format } from "date-fns";
-import AddToPlaylistDialog from "../dialogs/AddToPlaylistDialog";
-import { useAudioPlayerStore } from "../../store/useAudioPlayerStore";
+import AddToPlaylistDialog from "./dialogs/AddToPlaylistDialog";
+import { useAudioPlayerStore } from "../store/useAudioPlayerStore";
 
 interface TableListSongProps {
   songs?: Song[];

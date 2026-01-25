@@ -1,6 +1,5 @@
 import AudioPlayer from "./AudioPlayer";
 import { useState } from "react";
-// container music player
 const Footer = () => {
   const [currentSong] = useState({
     id: 1,
@@ -29,8 +28,6 @@ const Footer = () => {
         }
         onLoopToggle={() => setIsLoop(!isLoop)}
         onShuffleToggle={() => setIsShuffle(!isShuffle)}
-        onPrevious={() => console.log("Previous")}
-        onNext={() => console.log("Next")}
       />
     </div>
   );
