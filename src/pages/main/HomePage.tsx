@@ -1,11 +1,18 @@
 import TableListSong from "../../components/shared/TableListSong";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSongStore } from "../../store/useSongStore";
+
 const HomePage = () => {
   const [bgImage, setBgImage] = useState<string>("");
+  const { songs, artistName } = useSongStore();
+
   const receiveImgUrl = (url: string) => {
-    console.log("Received image URL from TableListSong:", url);
     setBgImage(url);
   };
+
+  useEffect(() => {
+    console.log("songs: ", songs);
+  }, [songs]);
   return (
     <div id="homepage" className="w-full relative">
       <div
@@ -22,6 +29,8 @@ const HomePage = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/60 to-black/80" />
       <div className="relative z-10">
         <TableListSong
+          songs={songs}
+          artistName={artistName}
           sendImageBackground={receiveImgUrl}
           isPlaylistPage={false}
         />

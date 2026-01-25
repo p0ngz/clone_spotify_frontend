@@ -23,9 +23,9 @@ export const usePlaylistSongStore = create<PlaylistSongState>((set) => ({
   getAllPlaylistSongs: async () => {
     set({ isLoading: true, error: null });
     try {
-      const data = await playlistSongService.getAllPlaylistSongs();
-      set({ playlistSongs: data || [], isLoading: false });
-      return data;
+      const response = await playlistSongService.getAllPlaylistSongs();
+      set({ playlistSongs: response?.playlistSongs || [], isLoading: false });
+      return response?.playlistSongs;
     } catch (err) {
       set({ error: (err as Error).message, isLoading: false });
       return undefined;
@@ -48,7 +48,8 @@ export const usePlaylistSongStore = create<PlaylistSongState>((set) => ({
     set({ isLoading: true, error: null });
     try {
       const data = await playlistSongService.getPlaylistSongByPlaylistId(playlistId);
-      set({ playlistSongs: data || [], isLoading: false });
+      console.log("getPlaylistSongByPlaylistId: ", data)
+      set({ playlistSongs: data?.playlist || [], isLoading: false });
       return data;
     } catch (err) {
       set({ error: (err as Error).message, isLoading: false });

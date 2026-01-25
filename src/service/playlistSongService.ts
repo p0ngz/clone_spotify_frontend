@@ -5,9 +5,18 @@ import type {
   UpdatePlaylistSongType,
 } from "../types/playlistSong.types";
 
+interface PlaylistSongResponse {
+  count: number;
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  playlistSongs: PlaylistSong[];
+}
+
 export const playlistSongService = {
   getAllPlaylistSongs: async () => {
-    const response = await axiosInstance.get<PlaylistSong[]>("/playlistSongs");
+    const response = await axiosInstance.get<PlaylistSongResponse>("/playlistSongs");
     return response?.data;
   },
   getPlaylistSongById: async (id: string) => {

@@ -5,9 +5,18 @@ import type {
   UpdateArtistType,
 } from "../types/artist.types";
 
+interface ArtistResponse {
+  count: number;
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  artists: Artist[];
+}
+
 export const artistService = {
   getAllArtist: async () => {
-    const response = await axiosInstance.get<Artist[]>("/artist");
+    const response = await axiosInstance.get<ArtistResponse>("/artists");
     return response?.data;
   },
   getArtistById: async (id: string) => {

@@ -7,6 +7,7 @@ interface PlaylistState {
   playlist: Playlist | null;
   getAllPlaylists: () => Promise<Playlist[] | undefined>;
   getPlaylistById: (id: string) => Promise<Playlist | undefined>;
+  getPlaylistByUserId: (userId: string) => Promise<Playlist[] | undefined>;
   isLoading: boolean;
   error: string | null;
 }
@@ -20,9 +21,9 @@ export const usePlaylistStore = create<PlaylistState>((set) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const playlists = await playlistService.getAllPlaylist();
-      set({ playlists: playlists || [], isLoading: false });
-      return playlists;
+      const response = await playlistService.getAllPlaylist();
+      set({ playlists: response?.playlists || [], isLoading: false });
+      return response?.playlists;
     } catch (err) {
       set({ error: (err as Error).message, isLoading: false });
       return undefined;
@@ -35,6 +36,18 @@ export const usePlaylistStore = create<PlaylistState>((set) => ({
       const playlist = await playlistService.getPlaylistById(id);
       set({ playlist: playlist || null, isLoading: false });
       return playlist;
+    } catch (err) {
+      set({ error: (err as Error).message, isLoading: false });
+      return undefined;
+    }
+  },
+  getPlaylistByUserId: async (userId: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response = await playlistService.getPlaylistByUserId(userId);
+      console.log("response: ", response);
+      set({ playlists: response?.playlistsByUserId?.playlists || [], isLoading: false });
+      return response?.playlists;
     } catch (err) {
       set({ error: (err as Error).message, isLoading: false });
       return undefined;

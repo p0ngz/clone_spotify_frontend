@@ -20,9 +20,9 @@ export const useArtistStore = create<ArtistState>((set) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const Artists = await artistService.getAllArtist();
-      set({ artists: Artists || [], isLoading: false });
-      return Artists;
+      const response = await artistService.getAllArtist();
+      set({ artists: response?.artists || [], isLoading: false });
+      return response?.artists;
     } catch (err) {
       set({ error: (err as Error).message, isLoading: false });
       return undefined;

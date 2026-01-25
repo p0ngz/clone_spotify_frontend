@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import PlaylistDetail from "../../components/PlaylistDetail";
 import TableListSong from "../../components/shared/TableListSong";
-
+import { useParams } from "react-router-dom";
+import { usePlaylistSongStore } from "../../store/usePlaylistSongStore";
 // Image array for looping
 const images = [
   "https://i.scdn.co/image/ab67616d0000b2738863bc11d2aa12b54f5aeb36",
@@ -133,22 +135,47 @@ const playlistSongs = [
 ];
 
 const PlaylistPage = () => {
+  const params = useParams();
+  const playlistId = params?.playlistId || "";
+  const { playlistSongs, getPlaylistSongByPlaylistId } = usePlaylistSongStore();
+  const totalDuration =
+    playlistSongs && playlistSongs.length > 0
+      ? Math.round(
+          playlistSongs.reduce(
+            (total, song) => total + (song.duration || 0),
+            0,
+          ) / 60,
+        )
+      : 0;
+  useEffect(() => {
+    // get song by playlist id
+    const fetchData = async (playlistId: string) => {
+      await getPlaylistSongByPlaylistId(playlistId);
+    };
+
+    fetchData(playlistId);
+  }, [playlistId, getPlaylistSongByPlaylistId]);
+  useEffect(() => {
+    console.log("playlistSongs: ", playlistSongs);
+  }, [playlistSongs]);
   return (
     <div id="playlist-page" className="w-full">
       <div id="playlist-detail-container" className="w-full h-64">
         <PlaylistDetail
-          playlistId={playlistDetail.playlistId}
-          title={playlistDetail.title}
-          description={playlistDetail.description}
-          coverImage={playlistDetail.coverImage}
-          createdBy={playlistDetail.createdBy}
-        //   createdAt={playlistDetail.createdAt}
-          totalSong={playlistDetail.totalSong}
-          totalDuration={playlistDetail.totalDuration}
+          playlistId={playlistSongs.playlist_id}
+          title={playlistSongs.playlist_name}
+          description={playlistSongs.playlist_description}
+          coverImage={playlistSongs.playlist_cover_image}
+          public_url={playlistSongs.playlist_cover_public_id}
+          createdBy={"Pongsatorn Tassaro"}
+
+          //   createdAt={playlistSongs.created_at}
+          totalSong={playlistSongs.total_songstotal_songs}
+          totalDuration={totalDuration}
         />
       </div>
       <div id="playlist-table" className="w-full">
-        <TableListSong isPlaylistPage={true} songs={playlistSongs} />
+        {/* <TableListSong isPlaylistPage={true} songs={playlistSongs.songs} /> */}
       </div>
     </div>
   );

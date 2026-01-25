@@ -1,62 +1,21 @@
 import ArtistList from "./ArtistList";
-import { useState } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import LibraryMusicRoundedIcon from "@mui/icons-material/LibraryMusicRounded";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import OpenInNewRoundedIcon from "@mui/icons-material/OpenInNewRounded";
 import ChipCard from "./ChipCard";
-
-const mockArtistData = [
-  {
-    id: 1,
-    name: "Mrs. GREEN APPLE",
-    image:
-      "https://plus.unsplash.com/premium_photo-1757498942847-47599549691a?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    type: "artist",
-  },
-  {
-    id: 2,
-    name: "Yuuri",
-    image:
-      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop",
-    type: "artist",
-  },
-  {
-    id: 3,
-    name: "My playlist #2",
-    image:
-      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=200&h=200&fit=crop",
-    type: "playlist",
-  },
-  {
-    id: 4,
-    name: "เพลยลิสต์ของคุณ #4",
-    subtitle: "เพลยลิสต์ของฉัน • Pongsatorn Tassa...",
-    image:
-      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop",
-    type: "playlist",
-  },
-  {
-    id: 5,
-    name: "SUDA MASAKI",
-    image:
-      "https://images.unsplash.com/photo-1593382067395-ace3045a1547?q=80&w=736&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    type: "artist",
-  },
-  {
-    id: 6,
-    name: "OFFICIAL HIGE DANDISM",
-    image:
-      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=200&h=200&fit=crop",
-    type: "artist",
-  },
-  {
-    id: 7,
-    name: "ONE OK ROCK",
-    image:
-      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=200&h=200&fit=crop",
-    type: "artist",
-  },
-] as const;
+import { useArtistStore } from "../../store/useArtistStore";
+import { usePlaylistStore } from "../../store/usePlaylistStore";
+import { useSongStore } from "../../store/useSongStore";
+import { useAlbumStore } from "../../store/useAlbumStore";
+import { env } from "../../config/env";
+type SidebarItem = {
+  id: string;
+  name: string;
+  image: string;
+  type: "artist" | "playlist";
+};
 const chipCardData = [
   { title: "เพลย์ลิสต์", type: "playlist" as const },
   { title: "ศิลปิน", type: "artist" as const },
@@ -64,11 +23,35 @@ const chipCardData = [
 
 // left sidebar component
 const LeftSidebar = () => {
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [selectedTypes, setSelectedTypes] = useState<Set<"artist" | "playlist">>(
-    new Set()
-  );
+  const navigate = useNavigate();
+  const { artists, getAllArtists, error: artistError } = useArtistStore();
+  const { playlists, getPlaylistByUserId, error: playlistError } = usePlaylistStore();
+  const { getSongByArtistId, setArtistName } = useSongStore();
+  const { getAllAlbumByArtistId } = useAlbumStore();
 
+  // Build sidebar menu data from store values (no local state needed)
+  const menuSidebarData = useMemo<SidebarItem[]>(() => {
+    const playlistItems: SidebarItem[] = (playlists || []).map((p) => ({
+      id: p._id,
+      name: p.name,
+      image: p.cover_image_url,
+      type: "playlist",
+    }));
+    const artistItems: SidebarItem[] = (artists || []).map((a) => ({
+      id: a._id,
+      name: a.name,
+      image: a.image_url,
+      type: "artist",
+    }));
+
+
+    return [...playlistItems, ...artistItems];
+  }, [playlists, artists]);
+
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedTypes, setSelectedTypes] = useState<
+    Set<"artist" | "playlist">
+  >(new Set());
   const handleTypeToggle = (type: "artist" | "playlist") => {
     const newTypes = new Set(selectedTypes);
     if (newTypes.has(type)) {
@@ -81,8 +64,40 @@ const LeftSidebar = () => {
 
   const filteredData =
     selectedTypes.size > 0
-      ? mockArtistData.filter((item) => selectedTypes.has(item.type))
-      : mockArtistData;
+      ? menuSidebarData.filter((item) => selectedTypes.has(item.type))
+      : menuSidebarData;
+
+  const handleSelect = async (item: SidebarItem) => {
+    if (item.type === "playlist") {
+      navigate(`/playlist/${item.id}`);
+      return;
+    }
+
+    // Artist click: set artist name and fetch songs + albums
+    setArtistName(item.name);
+    await getSongByArtistId(item.id);
+    // Fetch albums for this artist to display album names in table
+    await getAllAlbumByArtistId(item.id);
+  };
+
+  const loadSidebarData = useCallback(async () => {
+    try {
+      const userId = env?.VITE_USER_ID;
+      // If userId is missing, only load artists to avoid 500s from invalid route
+      if (userId) {
+        await Promise.all([getPlaylistByUserId(userId), getAllArtists()]);
+      } else {
+        await getAllArtists();
+      }
+    } catch (error) {
+      console.error("Failed to fetch data:", error);
+    }
+  }, [getPlaylistByUserId, getAllArtists]);
+
+  useEffect(() => {
+    loadSidebarData();
+  }, [loadSidebarData]);
+
   return (
     <div
       id="left-sidebar"
@@ -134,13 +149,22 @@ const LeftSidebar = () => {
             ))}
         </div>
       </div>
+      {/* Simple error banner when backend returns 500 */}
+      {(artistError || playlistError) && (
+        <div className="mx-2 mb-2 rounded bg-red-500/20 text-red-300 text-sm px-3 py-2">
+          ไม่สามารถโหลดข้อมูลได้ (500). ลองรีเฟรช หรือเช็ค backend.
+        </div>
+      )}
       <div id="artist-list-container" className="flex flex-col gap-2 my-4">
         {filteredData.map((artist) => (
           <ArtistList
             key={artist.id}
             item={artist}
             selected={selectedId === artist.id}
-            onSelect={() => setSelectedId(artist.id)}
+            onSelect={() => {
+              setSelectedId(artist.id);
+              handleSelect(artist);
+            }}
           />
         ))}
       </div>

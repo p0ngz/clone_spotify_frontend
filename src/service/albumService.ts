@@ -5,9 +5,18 @@ import type {
   UpdateAlbumType,
 } from "../types/album.types";
 
+interface AlbumResponse {
+  count: number;
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  albums: Album[];
+}
+
 export const albumService = {
   getAllAlbum: async () => {
-    const response = await axiosInstance.get<Album[]>("/albums");
+    const response = await axiosInstance.get<AlbumResponse>("/albums");
 
     return response?.data;
   },

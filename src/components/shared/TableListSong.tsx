@@ -10,19 +10,13 @@ import PlayArrowOutlinedIcon from "@mui/icons-material/PlayArrowOutlined";
 import PauseOutlinedIcon from "@mui/icons-material/PauseOutlined";
 import DateRangeOutlinedIcon from "@mui/icons-material/DateRangeOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
-
-interface Song {
-  id: number;
-  title: string;
-  artist: string;
-  album: string;
-  date: string;
-  duration: string;
-  image: string;
-}
+import type { Song } from "../../types/song.types";
+import { useAlbumStore } from "../../store/useAlbumStore";
+import { format } from "date-fns";
 
 interface TableListSongProps {
   songs?: Song[];
+  artistName?: string | null;
   sendImageBackground?: (imgUrl: string) => void;
   isPlaylistPage: boolean;
 }
@@ -30,103 +24,142 @@ interface TableListSongProps {
 // Mock data
 const mockSongs: Song[] = [
   {
-    id: 1,
+    _id: "1",
     title: "Shut Up and Dance",
-    artist: "Walk the Moon",
-    album: "TALKING IS HARD",
-    date: "2016-08-09",
-    duration: "3:18",
-    image:
+    artist_id: "artist1",
+    album_id: "album1",
+    audio_url: "",
+    audio_public_id: "",
+    duration: 198,
+    cover_image_url:
       "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&h=100&fit=crop",
+    cover_public_id: "",
+    genre: ["pop"],
+    release_date: "2016-08-09",
   },
   {
-    id: 2,
+    _id: "2",
     title: "Cheap Thrills",
-    artist: "Sia",
-    album: "Young the Giant Special Edit",
-    date: "2016-08-09",
-    duration: "3:31",
-    image:
+    artist_id: "artist2",
+    album_id: "album2",
+    audio_url: "",
+    audio_public_id: "",
+    duration: 211,
+    cover_image_url:
       "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop",
+    cover_public_id: "",
+    genre: ["pop"],
+    release_date: "2016-08-09",
   },
   {
-    id: 3,
+    _id: "3",
     title: "Pump Up the Kicks",
-    artist: "Foster the People",
-    album: "Torches",
-    date: "2016-08-09",
-    duration: "4:00",
-    image:
+    artist_id: "artist3",
+    album_id: "album3",
+    audio_url: "",
+    audio_public_id: "",
+    duration: 240,
+    cover_image_url:
       "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&h=100&fit=crop",
+    cover_public_id: "",
+    genre: ["pop"],
+    release_date: "2016-08-09",
   },
   {
-    id: 4,
+    _id: "4",
     title: "Take a Walk",
-    artist: "Passion Pit",
-    album: "Gossamer",
-    date: "2016-08-09",
-    duration: "4:24",
-    image:
+    artist_id: "artist4",
+    album_id: "album4",
+    audio_url: "",
+    audio_public_id: "",
+    duration: 264,
+    cover_image_url:
       "https://images.unsplash.com/photo-1511379938547-c1f69b13d835?w=100&h=100&fit=crop",
+    cover_public_id: "",
+    genre: ["pop"],
+    release_date: "2016-08-09",
   },
   {
-    id: 5,
+    _id: "5",
     title: "Work This Body",
-    artist: "Walk the Moon",
-    album: "TALKING IS HARD",
-    date: "2016-08-09",
-    duration: "3:56",
-    image:
+    artist_id: "artist1",
+    album_id: "album1",
+    audio_url: "",
+    audio_public_id: "",
+    duration: 236,
+    cover_image_url:
       "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&h=100&fit=crop",
+    cover_public_id: "",
+    genre: ["pop"],
+    release_date: "2016-08-09",
   },
   {
-    id: 6,
+    _id: "6",
     title: "Radioactive",
-    artist: "Imagine Dragons",
-    album: "Night Visions",
-    date: "2016-08-09",
-    duration: "3:07",
-    image:
+    artist_id: "artist5",
+    album_id: "album5",
+    audio_url: "",
+    audio_public_id: "",
+    duration: 187,
+    cover_image_url:
       "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop",
+    cover_public_id: "",
+    genre: ["rock"],
+    release_date: "2016-08-09",
   },
   {
-    id: 7,
+    _id: "7",
     title: "Everybody Talks",
-    artist: "Neon Trees",
-    album: "Pictures (Show Deluxe Edition)",
-    date: "2016-08-09",
-    duration: "2:57",
-    image:
+    artist_id: "artist6",
+    album_id: "album6",
+    audio_url: "",
+    audio_public_id: "",
+    duration: 177,
+    cover_image_url:
       "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&h=100&fit=crop",
+    cover_public_id: "",
+    genre: ["indie"],
+    release_date: "2016-08-09",
   },
   {
-    id: 8,
+    _id: "8",
     title: "Little Talks",
-    artist: "Of Monsters and Men",
-    album: "My Head Is An Animal",
-    date: "2016-08-09",
-    duration: "4:27",
-    image:
+    artist_id: "artist7",
+    album_id: "album7",
+    audio_url: "",
+    audio_public_id: "",
+    duration: 267,
+    cover_image_url:
       "https://images.unsplash.com/photo-1511379938547-c1f69b13d835?w=100&h=100&fit=crop",
+    cover_public_id: "",
+    genre: ["indie"],
+    release_date: "2016-08-09",
   },
 ];
 
 const TableListSong = ({
   songs = mockSongs,
+  artistName,
   sendImageBackground,
   isPlaylistPage = false,
 }: TableListSongProps) => {
-  const [playingId, setPlayingId] = useState<number | null>(null);
-  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const [playingId, setPlayingId] = useState<string | null>(null);
+  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
+  const { albums } = useAlbumStore();
+  const displaySongs = songs && songs.length > 0 ? songs : mockSongs;
 
-  const handlePlayPause = (id: number) => {
+  const getAlbumName = (albumId: string): string => {
+    const album = albums?.albums.find((a) => a._id === albumId);
+    return album?.title || "—";
+  };
+
+  const handlePlayPause = (id: string) => {
     setPlayingId(playingId === id ? null : id);
-    const imgUrl = mockSongs.find((song) => song.id === id)?.image || "";
+    const imgUrl =
+      displaySongs.find((song) => song._id === id)?.cover_image_url || "";
     sendImageBackground?.(imgUrl);
   };
-  useEffect(() => {
-    console.log(hoveredRow);
-  }, [hoveredRow]);
+
   return (
     <div id="table-list-song" className="w-full h-full">
       <TableContainer sx={{ backgroundColor: "transparent" }}>
@@ -162,19 +195,17 @@ const TableListSong = ({
               >
                 TITLE
               </TableCell>
-              {isPlaylistPage && (
-                <TableCell
-                  align="left"
-                  sx={{
-                    color: "rgba(255,255,255,0.5)",
-                    borderBottom: "1px solid rgba(255,255,255,0.1)",
-                    fontSize: "0.875rem",
-                    fontWeight: 500,
-                  }}
-                >
-                  Artist
-                </TableCell>
-              )}
+              <TableCell
+                align="left"
+                sx={{
+                  color: "rgba(255,255,255,0.5)",
+                  borderBottom: "1px solid rgba(255,255,255,0.1)",
+                  fontSize: "0.875rem",
+                  fontWeight: 500,
+                }}
+              >
+                Artist
+              </TableCell>
               <TableCell
                 sx={{
                   color: "rgba(255,255,255,0.5)",
@@ -212,10 +243,10 @@ const TableListSong = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {songs.map((song) => (
+            {displaySongs.map((song) => (
               <TableRow
-                key={song.id}
-                onMouseEnter={() => setHoveredRow(song.id)}
+                key={song._id}
+                onMouseEnter={() => setHoveredRow(song._id)}
                 onMouseLeave={() => setHoveredRow(null)}
                 sx={{
                   "&:hover": {
@@ -247,16 +278,16 @@ const TableListSong = ({
                 >
                   <div className="relative w-12 h-12 group">
                     <img
-                      src={song.image}
+                      src={song.cover_image_url}
                       alt={song.title}
                       className="w-full h-full object-cover rounded"
                     />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center">
                       <button
-                        onClick={() => handlePlayPause(song.id)}
+                        onClick={() => handlePlayPause(song._id)}
                         className="text-white hover:scale-110 transition"
                       >
-                        {playingId === song.id ? (
+                        {playingId === song._id ? (
                           <PauseOutlinedIcon fontSize="medium" />
                         ) : (
                           <PlayArrowOutlinedIcon fontSize="medium" />
@@ -275,37 +306,39 @@ const TableListSong = ({
                 >
                   {song.title}
                 </TableCell>
-                {isPlaylistPage && (
-                  <TableCell
-                    align="left"
-                    sx={{
-                      color: "rgba(255,255,255,0.5)",
-                      borderBottom: "1px solid rgba(255,255,255,0.1)",
-                      fontSize: "0.875rem",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {song.artist}
-                  </TableCell>
-                )}
                 <TableCell
+                  align="left"
                   sx={{
                     color: "rgba(255,255,255,0.7)",
                     borderBottom: "1px solid rgba(255,255,255,0.05)",
                     fontSize: "0.875rem",
                   }}
                 >
-                  {song.album}
+                  {artistName || "Unknown"}
                 </TableCell>
                 <TableCell
-                  align={isPlaylistPage ? "center" : "center"}
                   sx={{
                     color: "rgba(255,255,255,0.7)",
                     borderBottom: "1px solid rgba(255,255,255,0.05)",
                     fontSize: "0.875rem",
                   }}
                 >
-                  {song.date}
+                  {getAlbumName(song.album_id)}
+                </TableCell>
+                <TableCell
+                  align="center"
+                  sx={{
+                    color: "rgba(255,255,255,0.7)",
+                    borderBottom: "1px solid rgba(255,255,255,0.05)",
+                    fontSize: "0.875rem",
+                  }}
+                >
+                  {format(
+                    song.release_date
+                      ? new Date(song.release_date)
+                      : new Date(),
+                    "MMM dd, yyyy",
+                  )}
                 </TableCell>
                 {isPlaylistPage && (
                   <TableCell
@@ -316,7 +349,8 @@ const TableListSong = ({
                       fontSize: "0.875rem",
                     }}
                   >
-                    {song.duration}
+                    {Math.floor(song.duration / 60)}:
+                    {String(song.duration % 60).padStart(2, "0")}
                   </TableCell>
                 )}
               </TableRow>

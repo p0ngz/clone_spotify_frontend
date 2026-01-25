@@ -5,9 +5,18 @@ import type {
   UpdateUserRequest,
 } from "../types/user.types";
 
+interface UserResponse {
+  count: number;
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  users: User[];
+}
+
 export const userService = {
   getAllUser: async () => {
-    const response = await axiosInstance.get<User>("/users");
+    const response = await axiosInstance.get<UserResponse>("/users");
     return response.data;
   },
   getUserById: async (id: string) => {

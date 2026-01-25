@@ -5,9 +5,19 @@ import type {
   UpdatePlaylistType,
 } from "../types/playlist.types";
 
+// API response for paginated playlists
+interface PlaylistResponse {
+  count: number;
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  playlists: Playlist[];
+}
+
 export const playlistService = {
   getAllPlaylist: async () => {
-    const response = await axiosInstance.get<Playlist[]>("/playlists");
+    const response = await axiosInstance.get<PlaylistResponse>("/playlists");
     return response?.data;
   },
   getPlaylistById: async (id: string) => {
@@ -15,7 +25,9 @@ export const playlistService = {
     return response?.data;
   },
   getPlaylistByUserId: async (userId: string) => {
-    const response = await axiosInstance.get(`/playlists/user/${userId}`);
+    const response = await axiosInstance.get<PlaylistResponse>(
+      `/playlists/user/${userId}`,
+    );
     return response?.data;
   },
   createPlaylist: async (data: CreatePlaylistType) => {

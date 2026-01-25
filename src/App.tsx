@@ -18,7 +18,7 @@ const router = createBrowserRouter(
     <>
       <Route path="/" element={<MainLayout />}>
         <Route index element={<HomePage />} />
-        <Route path="/playlist" element={<PlaylistPage/>}/>
+        <Route path="/playlist/:playlistId" element={<PlaylistPage/>}/>
       </Route>
       <Route path="/auth" element={<AuthLayout />} />
     </>,

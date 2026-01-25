@@ -10,6 +10,7 @@ interface PlaylistDetailProps {
   title: string;
   description: string;
   coverImage: string | string[]; //if no cover image will be an array of strings of 1-3 cover image of song
+  public_url: string | null;
   createdBy: string;
   createdAt?: string;
   totalSong: number;
@@ -17,22 +18,22 @@ interface PlaylistDetailProps {
 }
 
 const menuData: MenuOption[] = [
-  {
-    id: "radio",
-    label: "Go to Playlist Radio",
-    onClick: () => console.log("Go to Playlist Radio"),
-  },
-  {
-    id: "collaborative",
-    label: "Collaborative Playlist",
-    onClick: () => console.log("Collaborative Playlist toggled"),
-  },
-  {
-    id: "make-secret",
-    label: "Make Secret",
-    onClick: () => console.log("Make Secret toggled"),
-    divider: true,
-  },
+  //   {
+  //     id: "radio",
+  //     label: "Go to Playlist Radio",
+  //     onClick: () => console.log("Go to Playlist Radio"),
+  //   },
+  //   {
+  //     id: "collaborative",
+  //     label: "Collaborative Playlist",
+  //     onClick: () => console.log("Collaborative Playlist toggled"),
+  //   },
+  //   {
+  //     id: "make-secret",
+  //     label: "Make Secret",
+  //     onClick: () => console.log("Make Secret toggled"),
+  //     divider: true,
+  //   },
   {
     id: "edit",
     label: "Edit Details",
@@ -44,21 +45,21 @@ const menuData: MenuOption[] = [
     onClick: () => console.log("Delete playlist"),
     divider: true,
   },
-  {
-    id: "create-similar",
-    label: "Create Similar Playlist",
-    onClick: () => console.log("Create Similar Playlist"),
-  },
-  {
-    id: "download",
-    label: "Download",
-    onClick: () => console.log("Download playlist"),
-  },
-  {
-    id: "share",
-    label: "Share",
-    onClick: () => console.log("Share playlist"),
-  },
+  //   {
+  //     id: "create-similar",
+  //     label: "Create Similar Playlist",
+  //     onClick: () => console.log("Create Similar Playlist"),
+  //   },
+  //   {
+  //     id: "download",
+  //     label: "Download",
+  //     onClick: () => console.log("Download playlist"),
+  //   },
+  //   {
+  //     id: "share",
+  //     label: "Share",
+  //     onClick: () => console.log("Share playlist"),
+  //   },
 ];
 const PlaylistDetail = ({
   playlistId,
