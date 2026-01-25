@@ -39,7 +39,7 @@ const PlaylistDetail = ({
   const handleDeletePlaylist = async () => {
     try {
       await deletePlaylistFromStore(playlistId);
-      console.log(`Playlist ${playlistId} deleted`);
+    //   console.log(`Playlist ${playlistId} deleted`);
       navigate("/");
     } catch (err) {
       console.error("Error deleting playlist:", err);

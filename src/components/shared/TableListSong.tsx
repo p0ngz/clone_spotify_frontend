@@ -13,6 +13,7 @@ import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import type { Song } from "../../types/song.types";
 import { format } from "date-fns";
 import AddToPlaylistDialog from "../dialogs/AddToPlaylistDialog";
+import { useAudioPlayerStore } from "../../store/useAudioPlayerStore";
 
 interface TableListSongProps {
   songs?: Song[];
@@ -27,16 +28,24 @@ const TableListSong = ({
   sendImageBackground,
   isPlaylistPage = false,
 }: TableListSongProps) => {
-  const [playingId, setPlayingId] = useState<string | null>(null);
+  const { setQueueAndPlay, pause, isPlaying, currentSong } =
+    useAudioPlayerStore();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const displaySongs = songs && songs.length > 0 ? songs : [];
 
-  const handlePlayPause = (id: string) => {
-    console.log("displaySongs: ", displaySongs)
-    setPlayingId(playingId === id ? null : id);
-    const imgUrl =
-      displaySongs.find((song: Song) => song._id === id)?.cover_image_url || "";
+  const handlePlayPause = (song: Song) => {
+    const queue = displaySongs;
+    const isCurrent = currentSong?._id === song._id;
+
+    if (isCurrent && isPlaying) {
+      pause();
+      return;
+    }
+
+    setQueueAndPlay(song, queue);
+
+    const imgUrl = song.cover_image_url || "";
     sendImageBackground?.(imgUrl);
   };
 
@@ -169,10 +178,10 @@ const TableListSong = ({
                       />
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center">
                         <button
-                          onClick={() => handlePlayPause(song._id)}
+                          onClick={() => handlePlayPause(song)}
                           className="text-white hover:scale-110 transition"
                         >
-                          {playingId === song._id ? (
+                          {currentSong?._id === song._id && isPlaying ? (
                             <PauseOutlinedIcon fontSize="medium" />
                           ) : (
                             <PlayArrowOutlinedIcon fontSize="medium" />
