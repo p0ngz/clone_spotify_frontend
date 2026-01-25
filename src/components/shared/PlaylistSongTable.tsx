@@ -270,10 +270,10 @@ const PlaylistSongTable = ({
                         alt={song.song_title}
                         className="w-full h-full object-cover rounded"
                       />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center">
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center group">
                         <button
                           onClick={() => handlePlayPause(song)}
-                          className="text-white hover:scale-110 transition  hover:cursor-pointer"
+                          className="text-white cursor-pointer hover:scale-110 transition  "
                         >
                           {isRowPlaying ? (
                             <PauseOutlinedIcon fontSize="medium" />
