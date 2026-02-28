@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { IconButton, Slider } from "@mui/material";
 import ShuffleOutlinedIcon from "@mui/icons-material/ShuffleOutlined";
 import SkipPreviousIcon from "@mui/icons-material/SkipPrevious";
@@ -6,7 +6,6 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
 import RepeatOutlinedIcon from "@mui/icons-material/RepeatOutlined";
-import PictureInPictureAltOutlinedIcon from "@mui/icons-material/PictureInPictureAltOutlined";
 import VolumeUpOutlinedIcon from "@mui/icons-material/VolumeUpOutlined";
 import { useAudioPlayerStore } from "../../store/useAudioPlayerStore";
 import type { Song } from "../../types/song.types";
@@ -15,6 +14,9 @@ const AudioPlayer = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isSeeking, setIsSeeking] = useState(false);
+  const isSeekingRef = useRef(false);
 
   const {
     currentSong,
@@ -41,42 +43,70 @@ const AudioPlayer = () => {
   const toggleOffHandler = () => {
     volumeLevelHandler(0);
   };
+
+  // Sync ref กับ state
+  useEffect(() => {
+    isSeekingRef.current = isSeeking;
+  }, [isSeeking]);
+
+  // Trigger slide-up animation
+  useEffect(() => {
+    if (currentSong) {
+      const timer = setTimeout(() => setIsVisible(true), 50);
+      return () => clearTimeout(timer);
+    } else {
+      setIsVisible(false);
+    }
+  }, [currentSong]);
+
+  // Load and play song
   useEffect(() => {
     if (!audioRef.current || !currentSong) return;
     audioRef.current.src = currentSong.audio_url;
     audioRef.current.load();
-    audioRef.current.play();
+    audioRef.current.play().catch(console.error);
+    setProgress(0);
+    setDuration(0);
   }, [currentSong]);
 
+  // Play/Pause control
   useEffect(() => {
     if (!audioRef.current) return;
     if (isPlaying) {
-      audioRef.current.play();
+      audioRef.current.play().catch(console.error);
     } else {
       audioRef.current.pause();
     }
   }, [isPlaying]);
 
+  // Volume control
   useEffect(() => {
     if (!audioRef.current) return;
     audioRef.current.volume = (volume ?? 80) / 100;
   }, [volume]);
 
+  // Listen timeupdate — depend on currentSong so it re-binds when song changes
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !currentSong) return;
 
-    const onTime = () => setProgress(audio.currentTime || 0);
+    const onTime = () => {
+      if (!isSeekingRef.current) {
+        setProgress(audio.currentTime || 0);
+      }
+    };
     const onMeta = () => setDuration(audio.duration || 0);
 
     audio.addEventListener("timeupdate", onTime);
     audio.addEventListener("loadedmetadata", onMeta);
+    audio.addEventListener("durationchange", onMeta);
 
     return () => {
       audio.removeEventListener("timeupdate", onTime);
       audio.removeEventListener("loadedmetadata", onMeta);
+      audio.removeEventListener("durationchange", onMeta);
     };
-  }, []);
+  }, [currentSong]);
 
   const handlePlayPauseClick = () => {
     if (!currentSong) return;
@@ -84,18 +114,14 @@ const AudioPlayer = () => {
     else resume();
   };
 
-  const handleSeek = (_: Event, value: number | number[]) => {
+  const handleSeek = useCallback((_event: Event, value: number | number[]) => {
     const nextTime = Array.isArray(value) ? value[0] : value;
     setProgress(nextTime);
     if (audioRef.current) {
       audioRef.current.currentTime = nextTime;
     }
-  };
-  // const turnOffVolumeHandler = (off: boolean) => {
-  //   if (off) {
-  //     volumeLevelHandler(0);
-  //   }
-  // };
+  }, []);
+
   const handleVolume = (_: Event, value: number | number[]) => {
     const lvl = Array.isArray(value) ? value[0] : value;
     volumeLevelHandler(lvl);
@@ -109,7 +135,6 @@ const AudioPlayer = () => {
   const artist = (songInfo as any)?.artist_name || "";
   const totalSeconds = duration || songInfo?.duration || 0;
 
-  useEffect(() => {}, [audioRef]);
   return (
     <>
       {currentSong && (
@@ -118,10 +143,12 @@ const AudioPlayer = () => {
           className={`
             fixed bottom-0 left-0 right-0
             bg-black opacity-75 px-4 py-3 flex items-center gap-4
-            transform transition-transform duration-2000 ease-in-out
-            ${currentSong ? "translate-y-0" : "translate-y-full"}
-        `}
+            transition-all duration-1000 ease-in-out
+            ${isVisible ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"}
+          `}
         >
+          <audio ref={audioRef} onEnded={next} preload="auto" />
+
           <div className="flex items-center gap-3 min-w-45 w-[30%]">
             <div id="cover-img-song" className="w-14 h-14 rounded shrink-0">
               <img
@@ -167,7 +194,6 @@ const AudioPlayer = () => {
                 <SkipPreviousIcon />
               </IconButton>
 
-              <audio ref={audioRef} onEnded={next} preload="auto" />
               <IconButton
                 onClick={handlePlayPauseClick}
                 sx={{
@@ -204,8 +230,11 @@ const AudioPlayer = () => {
               </span>
               <Slider
                 value={progress}
+                min={0}
+                max={Math.max(totalSeconds, 1)}
+                onMouseDown={() => setIsSeeking(true)}
+                onMouseUp={() => setIsSeeking(false)}
                 onChange={handleSeek}
-                max={Math.max(totalSeconds, progress, 1)}
                 sx={{
                   color: "white",
                   height: 4,
@@ -216,9 +245,7 @@ const AudioPlayer = () => {
                       boxShadow: "0px 0px 0px 8px rgba(255, 255, 255, 0.16)",
                     },
                   },
-                  "& .MuiSlider-track": {
-                    border: "none",
-                  },
+                  "& .MuiSlider-track": { border: "none" },
                   "& .MuiSlider-rail": {
                     opacity: 0.3,
                     backgroundColor: "#bfbfbf",
@@ -238,7 +265,7 @@ const AudioPlayer = () => {
                 fontSize="small"
                 sx={{
                   color: "rgba(255,255,255,0.7)",
-                  "&:hover": "cursor-pointer",
+                  cursor: "pointer",
                 }}
                 onClick={() => toggleOffHandler()}
               />
@@ -255,9 +282,7 @@ const AudioPlayer = () => {
                       boxShadow: "0px 0px 0px 8px rgba(255, 255, 255, 0.16)",
                     },
                   },
-                  "& .MuiSlider-track": {
-                    border: "none",
-                  },
+                  "& .MuiSlider-track": { border: "none" },
                   "& .MuiSlider-rail": {
                     opacity: 0.3,
                     backgroundColor: "#bfbfbf",
@@ -271,4 +296,5 @@ const AudioPlayer = () => {
     </>
   );
 };
+
 export default AudioPlayer;
